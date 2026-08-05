@@ -143,6 +143,8 @@ extension TestHelpers {
                 .label("Unread"),
                 .label("Read"),
             ])
+        // Keyed on a native element: this screen's web content is invisible to a plain describe-ui.
+        case "web-content-test": return .identifier("web-content-test-webview")
         case "alert-test": return .identifier("alert-test-show-alert")
         case "sheet-test": return .identifier("sheet-test-open-sheet")
         case "context-menu-test": return .identifier("context-menu-test-target")

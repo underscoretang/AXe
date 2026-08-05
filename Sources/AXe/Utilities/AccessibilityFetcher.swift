@@ -34,6 +34,7 @@ struct AccessibilityFetcher {
     static func fetchAccessibilityInfoJSONData(
         for simulatorUDID: String,
         point: AccessibilityPoint? = nil,
+        remoteContent: FBAccessibilityRemoteContentOptions? = nil,
         logger: AxeLogger,
         recoveryDependencies: AccessibilityRecoveryDependencies = .live
     ) async throws -> Data {
@@ -51,7 +52,7 @@ struct AccessibilityFetcher {
             if let point {
                 return try await fetchAccessibilityInfoJSONData(from: target, at: point)
             }
-            return try await fetchFrontmostAccessibilityInfoJSONData(from: target)
+            return try await fetchFrontmostAccessibilityInfoJSONData(from: target, remoteContent: remoteContent)
         }
     }
 
@@ -92,7 +93,10 @@ struct AccessibilityFetcher {
         return latestData
     }
 
-    private static func fetchFrontmostAccessibilityInfoJSONData(from target: FBSimulator) async throws -> Data {
+    private static func fetchFrontmostAccessibilityInfoJSONData(
+        from target: FBSimulator,
+        remoteContent: FBAccessibilityRemoteContentOptions? = nil
+    ) async throws -> Data {
         var latestData: Data?
         for attempt in 0..<5 {
             // IDB's former `accessibilityElements(withNestedFormat:)` API also serialized the
@@ -100,7 +104,7 @@ struct AccessibilityFetcher {
             let accessibilityElement = try await target.accessibilityElementForFrontmostApplication()
             let data: Data
             do {
-                data = try serializedAccessibilityData(from: accessibilityElement)
+                data = try serializedAccessibilityData(from: accessibilityElement, remoteContent: remoteContent)
                 accessibilityElement.close()
             } catch {
                 accessibilityElement.close()
@@ -251,11 +255,20 @@ struct AccessibilityFetcher {
         process.waitUntilExit()
     }
 
-    private static func serializedAccessibilityData(from accessibilityElement: FBAccessibilityElement) throws -> Data {
+    private static func serializedAccessibilityData(
+        from accessibilityElement: FBAccessibilityElement,
+        remoteContent: FBAccessibilityRemoteContentOptions? = nil
+    ) throws -> Data {
+        // collectFrameCoverage stays off: the serializer fills the coverage grid from every
+        // non-Application frame, and real screens have enough full-screen containers to saturate it
+        // mid-walk, silently skipping every probe. With it off, all grid points are probed;
+        // duplicate hits collapse via PID/frame de-duplication and maxPoints bounds the cost.
+        // `is_remote` is requested only in this mode, so the default JSON schema is unchanged.
         let response = try accessibilityElement.serialize(
             with: FBAccessibilityRequestOptions(
                 nestedFormat: true,
-                keys: accessibilityRequestKeys
+                keys: remoteContent == nil ? accessibilityRequestKeys : accessibilityRequestKeys.union([.isRemote]),
+                remoteContentOptions: remoteContent
             )
         )
         return try serializeAccessibilityInfo(addingCompatibilityDefaults(to: response.elements))

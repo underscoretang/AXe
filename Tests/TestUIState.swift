@@ -17,6 +17,7 @@ struct UIElement: Decodable {
     let AXValue: String?
     let AXUniqueId: String?
     let AXIdentifier: String?
+    let isRemote: String?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -35,6 +36,7 @@ struct UIElement: Decodable {
         case AXValue
         case AXUniqueId
         case AXIdentifier
+        case isRemote = "is_remote"
     }
 
     init(from decoder: Decoder) throws {
@@ -56,6 +58,7 @@ struct UIElement: Decodable {
         AXValue = try Self.decodeOptionalScalarString(from: container, forKey: .AXValue)
         AXUniqueId = try Self.decodeOptionalScalarString(from: container, forKey: .AXUniqueId)
         AXIdentifier = try Self.decodeOptionalScalarString(from: container, forKey: .AXIdentifier)
+        isRemote = try Self.decodeOptionalScalarString(from: container, forKey: .isRemote)
     }
 
     private static func decodeOptionalScalarString(

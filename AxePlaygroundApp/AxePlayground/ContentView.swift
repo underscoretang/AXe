@@ -65,6 +65,8 @@ struct ContentView: View {
             SearchableTestView()
         case "toolbar-picker-test":
             ToolbarPickerTestView()
+        case "web-content-test":
+            WebContentTestView()
         case "alert-test":
             AlertTestView()
         case "sheet-test":
@@ -126,7 +128,8 @@ struct MainMenuView: View {
         ("Accessibility", [
             ("slider-value-test", "Slider Value Test", "Numeric AXValue with selector tap"),
             ("searchable-test", "Searchable Test", "Navigation search field targeting"),
-            ("toolbar-picker-test", "Toolbar Picker Test", "Toolbar segmented picker targeting")
+            ("toolbar-picker-test", "Toolbar Picker Test", "Toolbar segmented picker targeting"),
+            ("web-content-test", "Web Content Test", "WKWebView page content in a separate process")
         ]),
         ("Presentation", [
             ("alert-test", "Alert Test", "Alert presentation and button targeting"),
