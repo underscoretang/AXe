@@ -21,7 +21,7 @@ struct DescribeUI: AsyncParsableCommand {
 
     @Flag(
         name: .customLong("include-web-content"),
-        help: "Also describe WKWebView and SFSafariViewController page content, which the in-process accessibility walk cannot reach. Discovered elements report \"is_remote\": \"point_grid\"."
+        help: "Also describe WKWebView and SFSafariViewController page content, which the in-process accessibility walk cannot reach. Only content currently on screen is found; discovered elements report \"is_remote\": \"point_grid\"."
     )
     var includeWebContent = false
 
@@ -77,6 +77,8 @@ struct DescribeUI: AsyncParsableCommand {
         print(jsonString)
     }
 
+    // The grid covers the whole screen, so points that land outside the web view can return other
+    // out-of-process UI too (the status bar, for example). `region` could bound this if it matters.
     private func remoteContentOptions() -> FBAccessibilityRemoteContentOptions? {
         guard includeWebContent else {
             return nil

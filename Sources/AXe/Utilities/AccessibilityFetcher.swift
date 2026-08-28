@@ -263,7 +263,8 @@ struct AccessibilityFetcher {
         // non-Application frame, and real screens have enough full-screen containers to saturate it
         // mid-walk, silently skipping every probe. With it off, all grid points are probed;
         // duplicate hits collapse via PID/frame de-duplication and maxPoints bounds the cost.
-        // `is_remote` is requested only in this mode, so the default JSON schema is unchanged.
+        // `is_remote` is requested only in this mode, so the default JSON schema is unchanged. With
+        // it on, grid-discovered elements report "point_grid" and natively walked ones "recursive".
         let response = try accessibilityElement.serialize(
             with: FBAccessibilityRequestOptions(
                 nestedFormat: true,
